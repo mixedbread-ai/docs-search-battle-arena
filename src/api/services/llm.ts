@@ -13,12 +13,11 @@ export class LLMService {
 
   constructor() {
     const key =
-      process.env.GOOGLE_API_KEY ||
-      process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+      process.env.AI_GATEWAY_API_KEY ||
       "";
 
-    if (process.env.GOOGLE_API_KEY) {
-      process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.GOOGLE_API_KEY;
+    if (process.env.AI_GATEWAY_API_KEY) {
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.AI_GATEWAY_API_KEY;
     }
 
     this.hasApiKey = !!key;
@@ -97,7 +96,7 @@ Provide your evaluation in the following JSON format only:
     let text;
     try {
       result = await generateText({
-        model: google(this.modelName),
+        model: "google/gemini-2.5-flash",
         prompt: prompt,
       });
       text = result.text;
