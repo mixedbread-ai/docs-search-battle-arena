@@ -1,5 +1,4 @@
 import { SearchResult } from "../providers";
-import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
 interface EvaluationResult {
