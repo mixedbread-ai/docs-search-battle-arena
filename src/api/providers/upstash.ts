@@ -42,6 +42,35 @@ export class UpstashSearchProvider implements SearchProvider {
     });
   }
 
+  private deduplicateByTitle(results: SearchResult[]): SearchResult[] {
+    const titleMap = new Map<string, SearchResult>();
+
+    for (const result of results) {
+      const title = result.title || "";
+      const existing = titleMap.get(title);
+
+      // Keep the result with the higher score, or the first one if scores are equal
+      if (!existing || (result.score || 0) > (existing.score || 0)) {
+        titleMap.set(title, result);
+      }
+    }
+
+    // Return results in the order they first appeared
+    const seenTitles = new Set<string>();
+    return results.filter((result) => {
+      const title = result.title || "";
+      if (seenTitles.has(title)) {
+        return false;
+      }
+      const mapResult = titleMap.get(title);
+      if (mapResult === result) {
+        seenTitles.add(title);
+        return true;
+      }
+      return false;
+    });
+  }
+
   async search(query: string): Promise<SearchResult[]> {
     try {
       // Initialize the Upstash Search client
@@ -77,8 +106,7 @@ export class UpstashSearchProvider implements SearchProvider {
         };
       });
 
-      // Deduplicate results by URL, keeping the highest scoring result for each URL
-      return this.deduplicateByUrl(transformedResults);
+      return this.deduplicateByTitle(transformedResults);
     } catch (error) {
       console.error("Error searching Upstash:", error);
       throw new Error(
