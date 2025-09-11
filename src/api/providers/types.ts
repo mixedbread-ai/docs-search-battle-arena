@@ -3,7 +3,7 @@ export interface SearchResult {
   id: string;
   title: string;
   description: string;
-  // url?: string;
+  url?: string;
   score?: number;
   [key: string]: unknown; // Allow for additional provider-specific fields
 }

@@ -27,6 +27,8 @@ export class AlgoliaSearchProvider implements SearchProvider {
         objectID?: string;
         title?: string;
         overview?: string;
+        content?: string;
+        url?: string;
       }
 
       // Perform the search using client.search
@@ -53,7 +55,8 @@ export class AlgoliaSearchProvider implements SearchProvider {
         return {
           id: hit.objectID,
           title: hit.title,
-          description: hit.overview,
+          description: hit.content,
+          url: `https://vercel.com${hit.url}`,
         };
       });
     } catch (error) {
