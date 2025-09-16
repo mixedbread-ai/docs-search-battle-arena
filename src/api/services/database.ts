@@ -35,7 +35,7 @@ export class DatabaseService {
    */
   async createDatabase(
     label: string,
-    provider: "algolia" | "upstash_search",
+    provider: "algolia" | "upstash_search" | "mixedbread_search",
     credentials: string
   ) {
     // Create the database record with credentials

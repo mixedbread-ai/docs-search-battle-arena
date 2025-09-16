@@ -4,7 +4,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Provider types enum
-CREATE TYPE provider_type AS ENUM ('algolia', 'upstash_search');
+CREATE TYPE provider_type AS ENUM ('algolia', 'upstash_search', 'mixedbread_search');
 
 -- Database table to store search database credentials
 CREATE TABLE databases (

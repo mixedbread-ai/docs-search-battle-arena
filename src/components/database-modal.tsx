@@ -33,7 +33,7 @@ interface DatabaseModalProps {
 // Form data type
 type FormData = {
   label: string;
-  provider: "upstash_search" | "algolia";
+  provider: "upstash_search" | "algolia" | "mixedbread_search";
   credentials: string;
 };
 
@@ -45,6 +45,8 @@ UPSTASH_INDEX=your-index-name`,
   algolia: `ALGOLIA_APPLICATION_ID=your-app-id
 ALGOLIA_API_KEY=your-api-key
 ALGOLIA_INDEX=your-index-name`,
+  mixedbread_search: `MXBAI_API_KEY=your-api-key
+VECTOR_STORE_ID=your-store-id`,
 };
 
 export function DatabaseModal({ open, onClose, database }: DatabaseModalProps) {
@@ -61,7 +63,7 @@ export function DatabaseModal({ open, onClose, database }: DatabaseModalProps) {
     defaultValues: {
       label: database?.label || "",
       provider:
-        (database?.provider as "upstash_search" | "algolia") ||
+        (database?.provider as "upstash_search" | "algolia" | "mixedbread_search") ||
         "upstash_search",
       credentials: database?.credentials || PROVIDER_TEMPLATES.upstash_search,
     },
@@ -74,12 +76,12 @@ export function DatabaseModal({ open, onClose, database }: DatabaseModalProps) {
       reset({
         label: database.label || "",
         provider:
-          (database.provider as "upstash_search" | "algolia") ||
+          (database.provider as "upstash_search" | "algolia" | "mixedbread_search") ||
           "upstash_search",
         credentials:
           database.credentials ||
           PROVIDER_TEMPLATES[
-            database.provider as "upstash_search" | "algolia"
+            database.provider as "upstash_search" | "algolia" | "mixedbread_search"
           ] ||
           PROVIDER_TEMPLATES.upstash_search,
       });
@@ -129,12 +131,12 @@ export function DatabaseModal({ open, onClose, database }: DatabaseModalProps) {
       reset({
         label: database.label || "",
         provider:
-          (database.provider as "upstash_search" | "algolia") ||
+          (database.provider as "upstash_search" | "algolia" | "mixedbread_search") ||
           "upstash_search",
         credentials:
           database.credentials ||
           PROVIDER_TEMPLATES[
-            database.provider as "upstash_search" | "algolia"
+            database.provider as "upstash_search" | "algolia" | "mixedbread_search"
           ] ||
           PROVIDER_TEMPLATES.upstash_search,
       });
@@ -207,6 +209,7 @@ export function DatabaseModal({ open, onClose, database }: DatabaseModalProps) {
                       Upstash Search
                     </SelectItem>
                     <SelectItem value="algolia">Algolia</SelectItem>
+                    <SelectItem value="mixedbread_search">Mixedbread Search</SelectItem>
                   </SelectContent>
                 </Select>
               )}

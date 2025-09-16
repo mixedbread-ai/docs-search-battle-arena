@@ -4,7 +4,7 @@ import { protectedProcedure, publicProcedure, router } from "../trpc";
 // Input validation schemas
 const createDatabaseSchema = z.object({
   label: z.string().min(1),
-  provider: z.enum(["algolia", "upstash_search"]),
+  provider: z.enum(["algolia", "upstash_search", "mixedbread_search"]),
   credentials: z.string().min(1),
 });
 

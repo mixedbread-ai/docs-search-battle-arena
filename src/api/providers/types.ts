@@ -29,3 +29,10 @@ export interface UpstashSearchCredentials {
   reranking: boolean;
   inputEnrichment: boolean;
 }
+
+// MixedBread Search credentials
+export interface MixedBreadSearchCredentials {
+  apiKey: string;
+  storeId: string;
+  reranking: boolean;
+}

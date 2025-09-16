@@ -1,5 +1,6 @@
 import { AlgoliaSearchProvider } from "./algolia";
 import { UpstashSearchProvider } from "./upstash";
+import { MixedBreadSearchProvider } from "./mixedbread";
 import { SearchProvider } from "./types";
 
 export * from "./types";
@@ -25,7 +26,7 @@ function parseEnvFile(envFile: string): Record<string, string> {
 
 // Factory function to create the appropriate search provider based on env file
 export function createSearchProvider(
-  provider: "algolia" | "upstash_search",
+  provider: "algolia" | "upstash_search" | "mixedbread_search",
   envFile: string
 ): SearchProvider {
   const env = parseEnvFile(envFile);
@@ -68,6 +69,22 @@ export function createSearchProvider(
         index: upstashIndex,
         reranking: upstashReranking,
         inputEnrichment: upstashInputEnrichment,
+      });
+    case "mixedbread_search":
+      const mxbToken = env.MXBAI_API_KEY;
+      const mxbStoreId = env.VECTOR_STORE_ID;
+      const mxbReranking = env.MXBAI_RERANKING === "false" ? false : true;
+
+      if (!mxbToken || !mxbStoreId ) {
+        throw new Error(
+          "Missing MXBAI Search credentials: MXBAI_API_KEY, VECTOR_STORE_ID are required"
+        );
+      }
+
+      return new MixedBreadSearchProvider({
+        apiKey: mxbToken,
+        storeId: mxbStoreId,
+        reranking: mxbReranking,
       });
     default:
       throw new Error(`Unsupported search provider: ${provider}`);

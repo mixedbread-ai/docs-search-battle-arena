@@ -1,4 +1,4 @@
-CREATE TYPE "public"."provider_type" AS ENUM('algolia', 'upstash_search');--> statement-breakpoint
+CREATE TYPE "public"."provider_type" AS ENUM('algolia', 'upstash_search', 'mixedbread_search');--> statement-breakpoint
 CREATE TABLE "battle_queries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"battle_id" uuid NOT NULL,

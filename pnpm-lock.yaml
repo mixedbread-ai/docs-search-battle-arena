@@ -17,6 +17,9 @@ importers:
       '@algolia/requester-fetch':
         specifier: ^5.33.0
         version: 5.33.0
+      '@mixedbread/sdk':
+        specifier: ^0.28.1
+        version: 0.28.1
       '@neondatabase/serverless':
         specifier: ^1.0.1
         version: 1.0.1
@@ -116,6 +119,9 @@ importers:
       react-hook-form:
         specifier: ^7.60.0
         version: 7.60.0(react@19.1.0)
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -798,6 +804,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@mixedbread/sdk@0.28.1':
+    resolution: {integrity: sha512-+YMo8VoxnKS91WCG127fRmY1vM6Wj/AB7hIbruNRJa0gDwqhhUXwu+pSq7iKT1omqjaTz69giceB6bEVHIC/5g==}
+    hasBin: true
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -2940,6 +2950,10 @@ packages:
   simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
 
+  slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
+    engines: {node: '>=8.0.0'}
+
   sonner@2.0.7:
     resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
     peerDependencies:
@@ -3684,6 +3698,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
+
+  '@mixedbread/sdk@0.28.1': {}
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
@@ -5921,6 +5937,8 @@ snapshots:
     dependencies:
       is-arrayish: 0.3.2
     optional: true
+
+  slugify@1.6.6: {}
 
   sonner@2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:

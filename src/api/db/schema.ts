@@ -17,6 +17,7 @@ import {
 export const providerEnum = pgEnum("provider_type", [
   "algolia",
   "upstash_search",
+  "mixedbread_search",
 ]);
 
 export const battleStatusEnum = pgEnum("battle_status", [

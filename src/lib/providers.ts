@@ -23,4 +23,12 @@ ALGOLIA_API_KEY=your-api-key
 ALGOLIA_INDEX=your-index-name
 `,
   },
+  mixedbread_search: {
+    name: "Mixedbread",
+    color: colors.purple,
+    env: `
+MXBAI_API_KEY=your-api-key
+VECTOR_STORE_ID=your-store-id
+`,
+  },
 };
