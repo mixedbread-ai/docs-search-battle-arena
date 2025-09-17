@@ -7,7 +7,7 @@ interface EvaluationResult {
 }
 
 export class LLMService {
-  private modelName = "google/gemini-2.5-flash";
+  private modelName = "gemini-2.5-flash";
   private hasApiKey: boolean;
 
   private static readonly MAX_PASSAGE_CHARS = 4000; 
