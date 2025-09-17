@@ -4,28 +4,40 @@ import { generateText } from "ai";
 interface EvaluationResult {
   score: number;
   feedback: string;
+  metrics?: {
+    ndcg5: number;
+    ndcg10: number;
+    nEU: number;
+  };
 }
 
 export class LLMService {
-  private modelName = "gemini-2.5-flash";
+  private modelName = "google/gemini-2.5-flash";
   private hasApiKey: boolean;
 
-  private static readonly MAX_PASSAGE_CHARS = 4000; 
+  private static readonly MAX_PASSAGE_CHARS = 4000;
   private static readonly MAX_TITLE_CHARS = 200;
+
+  // NEW: single place to control evaluation depth and EU alpha
+  private static readonly EVAL_DEPTH = 10;
+  private static readonly EU_ALPHA = 0.9;
 
   constructor() {
     const key =
       process.env.AI_GATEWAY_API_KEY ||
-      process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
       "";
 
-    if (process.env.AI_GATEWAY_API_KEY && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    if (process.env.AI_GATEWAY_API_KEY) {
       process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.AI_GATEWAY_API_KEY;
     }
 
     this.hasApiKey = !!key;
   }
 
+  /**
+   * Evaluates search results and assigns a score using Gemini 2.5 Flash
+   * If no API key is available, returns fallback scores of 0
+   */
   async evaluateSearchResults(
     query: string,
     results1: SearchResult[],
@@ -40,26 +52,44 @@ export class LLMService {
       return this.fallback();
     }
 
-    // Score each dataset sequentially (iterative calls per chunk)
-    const d1 = await this.scoreDataset(query, results1);
-    const d2 = await this.scoreDataset(query, results2);
+    // NEW: cap to top-10 before scoring
+    const top1 = results1.slice(0, LLMService.EVAL_DEPTH);
+    const top2 = results2.slice(0, LLMService.EVAL_DEPTH);
 
+    // Score each dataset (top-k only)
+    const d1 = await this.scoreDataset(query, top1);
+    const d2 = await this.scoreDataset(query, top2);
     const llmDuration = d1.durationMs + d2.durationMs;
+
+    // NEW: build arrays of per-rank labels for metrics
+    const s1 = (d1.perDoc || [])
+      .sort((a, b) => a.index - b.index)
+      .map(x => x.score)
+      .slice(0, LLMService.EVAL_DEPTH);
+
+    const s2 = (d2.perDoc || [])
+      .sort((a, b) => a.index - b.index)
+      .map(x => x.score)
+      .slice(0, LLMService.EVAL_DEPTH);
+
+    // NEW: pooled labels for ideal ranking (union of both top-10 lists)
+    const pooled = [...s1, ...s2];
+
+    const m1 = this.computeMetrics(s1, pooled);
+    const m2 = this.computeMetrics(s2, pooled);
 
     return {
       db1: {
-        score: d1.total,
-        feedback: this.makeFeedback(d1, 1),
+        score: m1.nEU,
+        feedback: this.makeFeedback(d1, 1, m1), // NEW: include printed metrics
       },
       db2: {
-        score: d2.total,
-        feedback: this.makeFeedback(d2, 2),
+        score: m2.nEU,
+        feedback: this.makeFeedback(d2, 2, m2), // NEW
       },
       llmDuration,
     };
   }
-
-  // ---------------------- Internal helpers ----------------------
 
   private fallback() {
     return {
@@ -75,11 +105,10 @@ export class LLMService {
   }
 
   private formatPassage(r: SearchResult) {
-    // Build a compact passage from the SearchResult fields
     const title = this.truncate(r.title || "Untitled", LLMService.MAX_TITLE_CHARS);
     const desc = this.truncate(r.description || "", LLMService.MAX_PASSAGE_CHARS);
     const url = r.url ? `\nURL: ${r.url}` : "";
-    return `Title: ${title}\n${desc}${url}`.trim();
+    return `Title: ${title}\n Description: ${desc}\n URL: ${url}`.trim();
   }
 
   private umbrelaPrompt(query: string, passage: string) {
@@ -97,7 +126,7 @@ export class LLMService {
       `Measure how well the content matches a likely intent of the query (M).\n` +
       `Measure how trustworthy the passage is (T).\n` +
       `Consider the aspects above and the relative importance of each, and decide on a final score (O). Final score must be an integer value only.\n` +
-      `Do not provide any code in result. Provide each score in the format of: ##final score: score without providing any reasoning.\n` +
+      `Do not provide any code in result. Provide each score in the format of: ##final score: score without providing any reasoning.\n`
     );
   }
 
@@ -120,9 +149,11 @@ export class LLMService {
       const result = await generateText({
         model: this.modelName,
         prompt,
+        temperature: 0.0,
       });
       text = (result as any)?.text || "";
     } catch (err) {
+      console.log("err", err);
       // On per-chunk failure, return score 0 and bubble raw error for feedback aggregation
       const endErr = (typeof performance !== "undefined" ? performance : { now: () => Date.now() }).now();
       return { score: 0, raw: `ERR:${String(err)}`, durationMs: endErr - start };
@@ -154,9 +185,10 @@ export class LLMService {
 
     const perDoc: Array<{ index: number; score: number }> = [];
 
-    // Sequential iteration (one LLM call per chunk)
-    for (let i = 0; i < results.length; i++) {
-      const r = results[i];
+    const capped = results.slice(0, LLMService.EVAL_DEPTH);
+
+    for (let i = 0; i < capped.length; i++) {
+      const r = capped[i];
       const passage = this.truncate(this.formatPassage(r), LLMService.MAX_PASSAGE_CHARS);
       const { score, raw, durationMs: d } = await this.scoreOne(query, passage);
       durationMs += d;
@@ -165,7 +197,6 @@ export class LLMService {
         if (raw.startsWith("ERR:")) errors += 1;
       }
 
-      // Clamp score defensively
       const s = (score < 0 || score > 3) ? 0 : (score as 0 | 1 | 2 | 3);
       counts[s] = (counts[s] || 0) + 1;
       total += s;
@@ -175,15 +206,68 @@ export class LLMService {
     return { total, counts, errors, durationMs, perDoc };
   }
 
+
+  private gain(rel: number): number {
+    return Math.pow(2, rel) - 1;
+  }
+
+  private dcgAt(scores: number[], D: number): number {
+    let sum = 0;
+    const L = Math.min(D, scores.length);
+    for (let i = 0; i < L; i++) {
+      const rel = scores[i] ?? 0;
+      sum += this.gain(rel) / Math.log2(i + 2);
+    }
+    return sum;
+  }
+
+  private ndcgAt(scores: number[], idealPool: number[], D: number): number {
+    const ideal = idealPool.slice().sort((a, b) => b - a);
+    const dcgSys = this.dcgAt(scores, D);
+    const dcgIdeal = this.dcgAt(ideal, D);
+    return dcgIdeal > 0 ? dcgSys / dcgIdeal : 0;
+  }
+
+  private expectedUtilityOutOf10(
+    scores: number[],
+    alpha = LLMService.EU_ALPHA,
+    L = LLMService.EVAL_DEPTH
+  ): number {
+    let num = 0;
+    let denomP = 0;
+    for (let i = 0; i < L; i++) {
+      const p = Math.pow(alpha, i);
+      const rel = scores[i] ?? 0;
+      num += p * this.gain(rel);
+      denomP += p;
+    }
+    // normalize by max gain = 7 at every position
+    const denom = denomP * this.gain(3);
+    return denom > 0 ? (num / denom) * 10 : 0;
+  }
+  private computeMetrics(scores: number[], pooled: number[]) {
+    return {
+      // ndcg5: this.ndcgAt(scores, pooled, 5),
+      // ndcg10: this.ndcgAt(scores, pooled, 10),
+      nEU: this.expectedUtilityOutOf10(scores, LLMService.EU_ALPHA, LLMService.EVAL_DEPTH),
+    };
+  }
+
+
   private makeFeedback(
     agg: { total: number; counts: Record<0 | 1 | 2 | 3, number>; errors: number; perDoc?: Array<{ index: number; score: number }>; },
-    dbIndex: 1 | 2
+    dbIndex: 1 | 2,
+    metrics?: { ndcg5: number; ndcg10: number; nEU: number } // NEW
   ) {
     const n = Object.values(agg.counts).reduce((a, b) => a + b, 0);
-    const max = 3 * n;
     const parts: string[] = [];
-    parts.push(`DB ${dbIndex}: ${n} docs scored; total ${agg.total}.`);
+    parts.push(`DB ${dbIndex}: ${n} docs scored (top ${LLMService.EVAL_DEPTH}). Total label sum: ${agg.total}.`);
     parts.push(`Breakdown — 3★: ${agg.counts[3]}, 2★: ${agg.counts[2]}, 1★: ${agg.counts[1]}, 0★: ${agg.counts[0]}.`);
+    if (metrics) {
+      parts.push(
+        `Score: ${metrics.nEU.toFixed(3)}.`
+      );
+    }
     if (agg.errors > 0) parts.push(`Note: ${agg.errors} chunk(s) failed to parse or errored and were counted as 0.`);
     return parts.join(" ");
   }

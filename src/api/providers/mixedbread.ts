@@ -62,22 +62,22 @@ export class MixedBreadSearchProvider implements SearchProvider {
             | ScoredVideoURLInputChunk,
           index: number
         ) => {
-          const description = item.generated_metadata?.description;
+          const description = item.text;
           const headingContext = Array.isArray(
             item.generated_metadata?.heading_context
           )
             ? (item.generated_metadata.heading_context as Array<{
-                text: string;
-                level: number;
-              }>)
+              text: string;
+              level: number;
+            }>)
             : [];
           const chunkHeadings = Array.isArray(
             item.generated_metadata?.chunk_headings
           )
             ? (item.generated_metadata.chunk_headings as Array<{
-                text: string;
-                level: number;
-              }>)
+              text: string;
+              level: number;
+            }>)
             : [];
           const pageTitle =
             item.generated_metadata?.title ||
