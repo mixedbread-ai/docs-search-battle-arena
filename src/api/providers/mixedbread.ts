@@ -37,23 +37,9 @@ export class MixedBreadSearchProvider implements SearchProvider {
         },
       });
 
-      // Deduplicate results based on file_id
-      const uniqueResults = res.data.reduce(
-        (acc, item) => {
-          if (!acc.some((existing) => existing.file_id === item.file_id)) {
-            acc.push(item);
-          }
-          return acc;
-        },
-        [] as (
-          | ScoredTextInputChunk
-          | ScoredImageURLInputChunk
-          | ScoredAudioURLInputChunk
-          | ScoredVideoURLInputChunk
-        )[]
-      );
 
-      const structuredResponse = uniqueResults.flatMap(
+
+      const structuredResponse = res.data.flatMap(
         (
           item:
             | ScoredTextInputChunk
