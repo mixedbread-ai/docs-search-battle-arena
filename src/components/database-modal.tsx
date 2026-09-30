@@ -46,7 +46,7 @@ UPSTASH_INDEX=your-index-name`,
 ALGOLIA_API_KEY=your-api-key
 ALGOLIA_INDEX=your-index-name`,
   mixedbread_search: `MXBAI_API_KEY=your-api-key
-VECTOR_STORE_ID=your-store-id`,
+STORE_ID=your-store-id`,
 };
 
 export function DatabaseModal({ open, onClose, database }: DatabaseModalProps) {

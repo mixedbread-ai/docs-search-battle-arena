@@ -28,7 +28,7 @@ ALGOLIA_INDEX=your-index-name
     color: colors.purple,
     env: `
 MXBAI_API_KEY=your-api-key
-VECTOR_STORE_ID=your-store-id
+STORE_ID=your-store-id
 `,
   },
 };
