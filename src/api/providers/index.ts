@@ -72,12 +72,13 @@ export function createSearchProvider(
       });
     case "mixedbread_search":
       const mxbToken = env.MXBAI_API_KEY;
-      const mxbStoreId = env.VECTOR_STORE_ID;
+      // VECTOR_STORE_ID kept as a fallback for databases saved before the rename
+      const mxbStoreId = env.STORE_ID ?? env.VECTOR_STORE_ID;
       const mxbReranking = env.MXBAI_RERANKING === "false" ? false : true;
 
       if (!mxbToken || !mxbStoreId ) {
         throw new Error(
-          "Missing MXBAI Search credentials: MXBAI_API_KEY, VECTOR_STORE_ID are required"
+          "Missing MXBAI Search credentials: MXBAI_API_KEY, STORE_ID are required"
         );
       }
 

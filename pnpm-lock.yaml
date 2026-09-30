@@ -18,8 +18,8 @@ importers:
         specifier: ^5.33.0
         version: 5.33.0
       '@mixedbread/sdk':
-        specifier: ^0.28.1
-        version: 0.28.1
+        specifier: ^0.78.0
+        version: 0.78.0
       '@neondatabase/serverless':
         specifier: ^1.0.1
         version: 1.0.1
@@ -805,8 +805,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@mixedbread/sdk@0.28.1':
-    resolution: {integrity: sha512-+YMo8VoxnKS91WCG127fRmY1vM6Wj/AB7hIbruNRJa0gDwqhhUXwu+pSq7iKT1omqjaTz69giceB6bEVHIC/5g==}
+  '@mixedbread/sdk@0.78.0':
+    resolution: {integrity: sha512-gd5F8jaMt+mwRPzPBkLuXwP8jbR5dQQul5uuJomHrxGaO6Msff92Zu4rMXjZRyI8JYhQIDbzGqy9uSxjSz1YWA==}
     hasBin: true
 
   '@napi-rs/wasm-runtime@0.2.12':
@@ -3699,7 +3699,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
 
-  '@mixedbread/sdk@0.28.1': {}
+  '@mixedbread/sdk@0.78.0': {}
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
